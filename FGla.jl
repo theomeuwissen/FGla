@@ -11,7 +11,7 @@ using Mmap,DelimitedFiles,LinearAlgebra,Statistics, Base.Threads
 pedfile="FGla.ped"          #defaul pedigree file
 plinkfilstem="plink"        #default  stem of plink files .bed, .bim, .fam 
 lstfile="" #list of animals for which Gla relationships are needed (DEFAULT: no relationships are needed: lstfile="")
-lstFfile=""               #list of animals for which inbreeding F is needed (DEFAULT: no F coefficients  needed: lstFfile="")
+Flstfile=""               #list of animals for which inbreeding F is needed (DEFAULT: no F coefficients  needed: lstFfile="")
 if(length(ARGS)>0)
   fargs=open("FGla.args","w")
   map(x->println(fargs,x),ARGS)
@@ -60,7 +60,7 @@ end
 # read pedfile; open output file
 ped=readdlm(pedfile,Int)
 Nanim=size(ped,1)
-iotxt="S.Int32$(Nsnp)x$(2Ngen).mmap"
+iotxt="S.Int32$(Nsnp)x$(2Nanim).mmap"
 println("S coefficients (1/2 & 0 for unknown) being written to ",iotxt)          
 io=open(iotxt,"w+")  #mmap output
 S=mmap(io,Array{Int32,2},(Nsnp,2Nanim))	
@@ -141,15 +141,15 @@ println(" Calculation of S: done")
 
           
 # calculate Gla          
-if(length(lstfile)+length(lstFfile)>0)
+if(length(lstfile)+length(Flstfile)>0)
 if(length(lstfile)>0)          
   lst=readdlm(lstfile,Int) #list of animals for which relationships are needed
 else
   lst=Int.([])
 end
 nlst=size(lst,1)
-if(length(lstFfile)>0)          
-  Flst=readdlm(lstFfile,Int) #list of animals for which relationships are needed
+if(length(Flstfile)>0)          
+  Flst=readdlm(Flstfile,Int) #list of animals for which relationships are needed
 else
   Flst=Int.([])
 end
@@ -184,7 +184,8 @@ for i=1:size(lstall,1)
     lst22[2i-1]=lstall[i]*2-1
     lst22[2i]=lstall[i]*2
 end
-
+nlst22=size(lst22,1)
+    
 # set up founder-alleles
 iox=open("foundall.Int32.mmap","w+")
 foundall=mmap(iox, Array{Int32,2}, (n,Nsnp))
@@ -199,7 +200,7 @@ end
 
 # sample founder alleles for gametes in lists and all positions
 for j=1:Nsnp
-    for i=nlst*2:-1:1
+    for i=nlst22:-1:1
         i_=lst22[i]
         if(foundall[i_,j]==0)
             ancest_=[i_]  #ancestor list
@@ -232,11 +233,11 @@ println(" finished sampling of founder alleles")
 
 if(nFlst>0)          
 @threads for i=1:nFlst
-    i_=[2*lst[i]-1, 2*lst[i]]
+    i_=[2*Flst[i]-1, 2*Flst[i]]
     F22_[i]=sum(foundall[i_[1],1:Nsnp].==foundall[i_[2],1:Nsnp])/Nsnp
 end
 writedlm("FGla.F",F22_)
-println("  F coefficients written to FGla.F")                    
+println(nFlst,"  F coefficients written to FGla.F")                    
 end #if
 
 
@@ -258,7 +259,7 @@ if(nlst>0)
 end
 A22.=A22_
           close(ios)
-println(" calculation of Gla: done")          
+println(" Gla written to mmap (memory mapped) file: ",iostxt)          
 end #if
 
           

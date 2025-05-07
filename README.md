@@ -9,7 +9,7 @@ the maternal or paternal allele is transmitted. Since these inheritances differ 
 
 
 ## Usage:
-julia --threads 20 FGla.jl pedfile=\"lamip.ped\" plinkfilstem=\"plinknew\" lstfile=\"byr2022.A22.srt\" lstFfile=\"byr2022.A22.srt\"     
+julia --threads 20 FGla.jl pedfile=\"lamip.ped\" plinkfilstem=\"plinknew\" lstfile=\"byr2022.A22.srt\" Flstfile=\"byr2022.A22.srt\"     
 
 Here the program uses 20 threads.     
 
@@ -21,7 +21,7 @@ genotypes are assumed known (for now).
 
 lstfile (optional) contains a list of animal IDs for which the Gla relationship matrix is needed.    
 
-lstFfile (optional) contains a list of animal IDs for which the inbreeding coefficients are needed.    
+Flstfile (optional) contains a list of animal IDs for which the inbreeding coefficients are needed.    
 
 Note: the input file names are between " signs which need to be 'protected' by a \\, resulting in the \\" signs. Dont include additional spaces. 
 If an additional space is included this will be considered the next commandline argument (filenames should not contain spaces).    
