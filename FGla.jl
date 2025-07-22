@@ -128,17 +128,20 @@ S=mmap(io,Array{Int32,2},(Nsnp,2Nanim))
 
 # interpolate S
 include("viterbi.jl")
+NS=0
+AS=0
 	for ii=1:Nanim*2
 	    if(any(S[:,ii].>0))
-#                println(ii," #Pos ",sum(S[:,ii].>0))
+                global NS+=1
+                global AS+=sum(S[:,ii].>0)/size(S,1)
                 S[:,ii]=viterbi(S[:,ii],recomb,gen_err)
                 println(ii," #Pos#swaps ",sum(S[2:end,ii].!=S[1:end-1,ii]))
                 sum(S[2:end,ii].!=S[1:end-1,ii])>10 ? S[:,ii].=0 : nothing
 	   end
 	end
-println(" Calculation of S: done")
-
-
+println(" Fraction individuals with known segregation indicators            ",NS/(2Nanim))
+println(" Fraction known segregation indicators given some known indicators ",AS/NS)
+println(" ")
           
 # calculate Gla          
 if(length(lstfile)+length(Flstfile)>0)
